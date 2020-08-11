@@ -1,10 +1,3 @@
-<style>
-p{
-    font-size: 18px;
-    text-indent: 2em;
-}
-</style>
-
 ## 1，工具介绍
 
 This is the tool whose function is to clean additional images and materials in blender ,as following.
