@@ -21,7 +21,7 @@ This is the tool whose function is to clean additional images and materials in b
 
 </center>
 
-快捷键默认为：**clt c**。
+快捷键默认为：**alt c**。
 
 materias：清除多余的材质
 
