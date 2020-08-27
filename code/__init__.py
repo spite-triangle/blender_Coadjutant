@@ -2,9 +2,9 @@
 bl_info = {
     "name" : "Coadjutant",
     "author" : "triangle",
-    "description" : "用于清理多余的材质和图片",
+    "description" : "用于清理多余的材质和图片，图片材质大图标查看",
     "blender" : (2, 80, 0),
-    "version" : (0, 2, 0),
+    "version" : (0, 2, 1),
     "location" : "",
     "category" : "Material",
     "doc_url" : "https://github.com/spite-triangle/blender_Coadjutant"
@@ -32,13 +32,16 @@ class Coadjutant_MT_menuPie(bpy.types.Menu):
 
         # 8 - TOP
         split = pie.row().box().split()
-        split.scale_x = 1.4
-        split.scale_y = 1.1
-        if  context.active_object:
+        split.scale_x = 1.2
+
+        if  context.active_object :
             self.draw_changeMaterials(split,context.active_object)
 
         if context.area.ui_type == "ShaderNodeTree" and hasattr(context.active_node,'image'):
-            self.draw_changeImages(split,context.active_node)
+            self.draw_changeNodeImages(split,context.active_node)
+
+        if context.area.ui_type in {'UV','VIEW'}:
+            self.draw_changeImages(split,context.space_data)
 
         # 7 - TOP - LEFT
         pie.separator()
@@ -88,12 +91,17 @@ class Coadjutant_MT_menuPie(bpy.types.Menu):
         # 材质
         col = split.column()
         col.alignment = "CENTER"
-        col.template_ID_preview(object,"active_material",rows=2,cols=5)
+        col.template_ID_preview(object,"active_material",new="material.new",rows=2,cols=5)
 
     # 图片切换界面
-    def draw_changeImages(self,split,node):
+    def draw_changeNodeImages(self,split,node):
         col = split.column()
-        col.template_ID_preview(node,"image",rows=2,cols=5)
+        col.template_ID_preview(node,"image",new="image.new", open="image.open",rows=2,cols=5)
+
+    # uv与图片编辑器界面
+    def draw_changeImages(self,split,spaceData):
+        col = split.column()
+        col.template_ID_preview(spaceData, "image",new="image.new", open="image.open",rows=2,cols=5)
 
 classes = (
     Coadjutant_OT_cleanFakeImages,
@@ -106,6 +114,13 @@ classes = (
 # 定义keymaps
 addon_keymaps = []
 
+def bendingKeyMap(wm,name,space_type):
+        km = wm.keyconfigs.addon.keymaps.new(name=name, space_type=space_type)
+        kmi = km.keymap_items.new("wm.call_menu_pie", 'C', 'PRESS', ctrl=False, alt=True)
+        kmi.properties.name = Coadjutant_MT_menuPie.bl_idname
+        addon_keymaps.append((km, kmi))
+
+
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
@@ -113,16 +128,14 @@ def register():
     wm = bpy.context.window_manager
     if wm.keyconfigs.addon:
         # 注册3D视图
-        km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
-        kmi = km.keymap_items.new("wm.call_menu_pie", 'C', 'PRESS', ctrl=False, alt=True)
-        kmi.properties.name = Coadjutant_MT_menuPie.bl_idname
-        addon_keymaps.append((km, kmi))
+        bendingKeyMap(wm,'3D View','VIEW_3D')
 
         # 注册节点编辑器
-        km = wm.keyconfigs.addon.keymaps.new(name='Node Editor', space_type='NODE_EDITOR')
-        kmi = km.keymap_items.new("wm.call_menu_pie", 'C', 'PRESS', ctrl=False, alt=True)
-        kmi.properties.name = Coadjutant_MT_menuPie.bl_idname
-        addon_keymaps.append((km, kmi))
+        bendingKeyMap(wm,'Node Editor','NODE_EDITOR')
+
+        # 注册uv与图片试图快捷键
+        bendingKeyMap(wm,'Image','IMAGE_EDITOR')
+
     ...
 
 def unregister():
