@@ -4,7 +4,7 @@ bl_info = {
     "author" : "triangle",
     "description" : "用于清理多余的材质和图片，图片材质大图标查看",
     "blender" : (2, 80, 0),
-    "version" : (0, 2, 2),
+    "version" : (0, 2, 3),
     "location" : "",
     "category" : "Material",
     "doc_url" : "https://github.com/spite-triangle/blender_Coadjutant"

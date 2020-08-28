@@ -121,6 +121,7 @@ class Coadjutant_OT_createMaterial(bpy.types.Operator):
 
         # uilist移动选中
         context.object.active_material_index = len(context.object.material_slots) - 1
-
+        # 打开材质的节点
+        context.object.active_material.use_nodes = True
 
         return {"FINISHED"}
