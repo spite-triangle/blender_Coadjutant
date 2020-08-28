@@ -4,19 +4,20 @@ bl_info = {
     "author" : "triangle",
     "description" : "用于清理多余的材质和图片，图片材质大图标查看",
     "blender" : (2, 80, 0),
-    "version" : (0, 2, 1),
+    "version" : (0, 2, 2),
     "location" : "",
     "category" : "Material",
     "doc_url" : "https://github.com/spite-triangle/blender_Coadjutant"
 }
 
 import bpy
-from . Tri_operators import Coadjutant_OT_cleanFakeImages,Coadjutant_OT_cleanFakeMaterials,Coadjutant_OT_cleanImages,Coadjutant_OT_cleanMaterials
+from . Tri_operators import Coadjutant_OT_cleanFakeImages,Coadjutant_OT_cleanFakeMaterials,Coadjutant_OT_cleanImages,Coadjutant_OT_cleanMaterials,Coadjutant_OT_cleanAllOrphan,Coadjutant_OT_createMaterial
 
 # Pie
 class Coadjutant_MT_menuPie(bpy.types.Menu):
     bl_idname = "Coadjustant_MT_menuPie"
     bl_label = "Coadjutant"
+    
 
     def draw(self, context):
         layout = self.layout
@@ -27,15 +28,16 @@ class Coadjutant_MT_menuPie(bpy.types.Menu):
         pie.separator()
         # 6 - RIGHT
         pie.separator()
+
         # 2 - BOTTOM
-        pie.separator()
+        pie.operator("triangle.cleanall", text="Purge All",icon='ORPHAN_DATA')
 
         # 8 - TOP
         split = pie.row().box().split()
         split.scale_x = 1.2
 
         if  context.active_object :
-            self.draw_changeMaterials(split,context.active_object)
+            self.draw_changeMaterials(split,context)
 
         if context.area.ui_type == "ShaderNodeTree" and hasattr(context.active_node,'image'):
             self.draw_changeNodeImages(split,context.active_node)
@@ -61,7 +63,9 @@ class Coadjutant_MT_menuPie(bpy.types.Menu):
         col.operator("triangle.cleanfakeimages", text="Fake Images")
 
     # 材质切换界面
-    def draw_changeMaterials(self,split,object):
+    def draw_changeMaterials(self,split,context):
+        object = context.active_object
+
         if object.mode == 'EDIT':
             rows = 5
 
@@ -71,11 +75,11 @@ class Coadjutant_MT_menuPie(bpy.types.Menu):
         col = split.column()
         subrow = col.row()
         subrow.template_list("MATERIAL_UL_matslots", "", object, "material_slots", object, "active_material_index",rows=rows)
-        
+       
         # 按钮：上下，删除
         subcol = subrow.column()
         subcol.scale_x = 0.8
-        subcol.operator("object.material_slot_add", icon='ADD', text="")
+        subcol.operator("triangle.creatematerial", icon='ADD', text="")
         subcol.operator("object.material_slot_remove", icon='REMOVE', text="")
         if len(object.material_slots) >= 2 :
             subcol.operator("object.material_slot_move", icon='TRIA_UP', text="").direction = 'UP'
@@ -91,7 +95,7 @@ class Coadjutant_MT_menuPie(bpy.types.Menu):
         # 材质
         col = split.column()
         col.alignment = "CENTER"
-        col.template_ID_preview(object,"active_material",new="material.new",rows=2,cols=5)
+        col.template_ID_preview(object,"active_material",rows=2,cols=5)
 
     # 图片切换界面
     def draw_changeNodeImages(self,split,node):
@@ -108,6 +112,8 @@ classes = (
     Coadjutant_OT_cleanFakeMaterials,
     Coadjutant_OT_cleanImages,
     Coadjutant_OT_cleanMaterials,
+    Coadjutant_OT_cleanAllOrphan,
+    Coadjutant_OT_createMaterial,
     Coadjutant_MT_menuPie
 )
 
